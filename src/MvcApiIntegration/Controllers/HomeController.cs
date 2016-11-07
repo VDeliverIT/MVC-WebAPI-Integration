@@ -11,18 +11,19 @@ namespace MvcApiIntegration.Controllers
 {
     public class HomeController : Controller
     {
-        HttpClient client;
+        HttpClient Client;
+        string BaseUrl;
         public HomeController()
         {
-            client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client = new HttpClient();
+            Client.DefaultRequestHeaders.Accept.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            BaseUrl = "http://localhost:1946/api/v1/todo";
         }
         public async Task<ActionResult> Index()
         {
-            string url = "http://localhost:1946/api/v1/todo";
-            client.BaseAddress = new Uri(url);
-            HttpResponseMessage responseMessage = await client.GetAsync(url);
+            Client.BaseAddress = new Uri(BaseUrl);
+            HttpResponseMessage responseMessage = await Client.GetAsync(BaseUrl);
             if (responseMessage.IsSuccessStatusCode)
             {
                 var responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -44,22 +45,20 @@ namespace MvcApiIntegration.Controllers
         {
             if (ModelState.IsValid)
             {
-                string url = "http://localhost:1946/api/v1/todo";
-                client.BaseAddress = new Uri(url);
-                HttpResponseMessage responseMessage = await client.PostAsJsonAsync(url, item);
+                Client.BaseAddress = new Uri(BaseUrl);
+                HttpResponseMessage responseMessage = await Client.PostAsJsonAsync(BaseUrl, item);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index");
                 }
-                return RedirectToAction("Error");
             }
-            return RedirectToAction("Error");
+            return View("Error");
         }
         public async Task<IActionResult> Edit(string key)
         {
-            string url = "http://localhost:1946/api/v1/todo/"+ key;
-            client.BaseAddress = new Uri(url);
-            HttpResponseMessage responseMessage = await client.GetAsync(url);
+            string url = BaseUrl + "/" + key;
+            Client.BaseAddress = new Uri(url);
+            HttpResponseMessage responseMessage = await Client.GetAsync(url);
             if (responseMessage.IsSuccessStatusCode)
             {
                 var responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -75,46 +74,42 @@ namespace MvcApiIntegration.Controllers
         {
             if (ModelState.IsValid)
             {
-                string url = "http://localhost:1946/api/v1/todo/" + key;
-                client.BaseAddress = new Uri(url);
-                HttpResponseMessage responseMessage = await client.PutAsJsonAsync(url, aTodoItem);
+                string url = BaseUrl +"/" + key;
+                Client.BaseAddress = new Uri(url);
+                HttpResponseMessage responseMessage = await Client.PutAsJsonAsync(url, aTodoItem);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index");
                 }
-                return RedirectToAction("Error");
             }
             return View("Error");
         }
 
         public async Task<ActionResult> Delete(string key)
         {
-            string url = "http://localhost:1946/api/v1/todo/" + key;
-            client.BaseAddress = new Uri(url);
-            HttpResponseMessage responseMessage = await client.GetAsync(url);
+            string url = BaseUrl + "/" + key;
+            Client.BaseAddress = new Uri(url);
+            HttpResponseMessage responseMessage = await Client.GetAsync(url);
             if (responseMessage.IsSuccessStatusCode)
             {
                 var responseData = responseMessage.Content.ReadAsStringAsync().Result;
-
                 var item = JsonConvert.DeserializeObject<TodoItem>(responseData);
-
                 return View(item);
             }
             return View("Error");
         }
 
-        //The DELETE method
         [HttpPost]
         public async Task<ActionResult> Delete(string key, [Bind("Name,IsComplete,Key")] TodoItem aTodoItem)
         {
-            string url = "http://localhost:1946/api/v1/todo/" + key;
-            client.BaseAddress = new Uri(url);
-            HttpResponseMessage responseMessage = await client.DeleteAsync(url);
+            string url = BaseUrl + "/" + key;
+            Client.BaseAddress = new Uri(url);
+            HttpResponseMessage responseMessage = await Client.DeleteAsync(url);
             if (responseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction("Index");
             }
-            return RedirectToAction("Error");
+            return View("Error");
         }
     }
 }
