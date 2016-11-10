@@ -100,7 +100,7 @@ namespace MvcApiIntegration.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Delete(string key, [Bind("Name,IsComplete,Key")] TodoItem aTodoItem)
+        public async Task<ActionResult> DeleteItem(string key)
         {
             string url = BaseUrl + "/" + key;
             Client.BaseAddress = new Uri(url);
